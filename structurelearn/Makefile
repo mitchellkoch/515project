@@ -1,3 +1,5 @@
+# Use run.py now instead
+
 coffee_mat.tsv:
 	python mkmatrix.py ../data/coffee.txt coffee_mat.tsv
 
