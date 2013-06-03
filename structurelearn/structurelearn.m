@@ -3,7 +3,6 @@ addpath(genpathKPM(pwd))
 cd ..
 
 load -ascii coffee_mat.tsv
-load -ascii book_mat.tsv
 
 % imagesc(coffee_mat)
 % imagesc(book_mat)
@@ -27,6 +26,8 @@ final_graph2 = cell2mat(sampled_graphs(end));
 save coffee_graph_mcmc_100samps_10burnin_smoothed.adj.tsv final_graph2 -ascii -tabs
 
 % Repeat for book dataset
+
+load -ascii book_mat.tsv
 
 N = size(book_mat, 2);
 ns = ones(N, 1);
