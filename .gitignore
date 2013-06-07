@@ -1,1 +1,3 @@
 *.pyc
+/report/auto/bib.el
+/report/auto/relentail-report.el
