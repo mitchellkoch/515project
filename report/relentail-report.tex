@@ -27,8 +27,9 @@ between entities~\cite{TaskarWAK03, Taskar:2002:DPM:2073876.2073934}.
 Freebase using distant supervision as in~\cite{HoffmannZLZW11}
 
 \subsection{Database Query Task}
+We define the following database query task to evaluate a relation entailment graph. Let $R$ be a set of relation strings, and $A$ be a set of argument strings. We are given a database $D$ of facts, where each fact is of the form $r(x, y)$ for some $r\in R$ and $x, y\in A$.
 
-Given a query for relation $R$ with arguments $X$ and $Y$, we expand the query to include all entailing relations. Given an original query $R(X, Y)$, it is expanded to $R^\prime(X,Y)$ for all $R^\prime$ such that there is an edge from $R^\prime$ to $R$ in the entailment graph. This process is shown in Figure~\ref{query-expansion}. 
+Given a query for a relation $r$ with arguments $x$ and $y$, we can expand the query to additionally search for all $r^\prime(x, y)$ such that there exists an edge from $r^\prime$ to $r$ in the entailment graph. An example of this process is shown in Figure~\ref{query-expansion}. We can then evaluate the correctness of the returned results.
 
 \begin{figure}[h]
 \begin{center}
@@ -41,34 +42,31 @@ Given a query for relation $R$ with arguments $X$ and $Y$, we expand the query t
 
 \subsection{Constraints on WordNet}
 
-WordNet~\cite{fellbaum98wordnet} is a hand-crafted resource that
-distinguishes between different word senses, and provides synonyms and
-entailments between them. We denote a word net sense with a number where \textit{\#1} is the most common. For example \textit{note\#4} is the fourth most common sense of ``note,'' which means ``to write down''. Each WordNet sense has its sense number, a count indicating how often that sense is used, and a probability, which is the count divided by the sum of counts for all senses of the same word.
+WordNet~\cite{fellbaum98wordnet} is a hand-crafted resource that distinguishes between different word senses, and provides synonyms and entailments between them. We denote a WordNet sense with a number where \textit{\#1} is the most common. For example \textit{note\#4} is the fourth most common sense of ``note,'' which means ``to write down''. Each WordNet sense has its sense number, a count indicating how often that sense is used, and a probability, which is the count divided by the sum of counts for all senses of the same word.
 
-The challenge in using WordNet for relation entailment is that we need to determine what sense to use. Given the verb ``take,'' is it \textit{take\#21} (take by force) or \textit{take\#2} (take time)?
+\subsubsection{WordNet entailment graph}
+A troponym is a specialization of a word, e.g., ``to fly'' is a troponym of ``to travel.'' We say that WordNet sense $w_1$ entails $w_2$ if $w_1$ is a synonym of $w_2$, if $w_1$ is a troponym of $w_2$ in WordNet, or if there exists some $w_3$ such that $w_1$ entails $w_3$ and $w_3$ entails $w_2$. A path in the entailment graph is defined as the sequence of troponyms between $w_1$ and $w_2$. The entailment graph is disconnected. Figure ~\ref{wordnet-graph} shows one component of the graph, and Figure ~\ref{example-path} shows an example of a path in the graph, from \textit{note\#4} to \textit{write\#2}.
 
-We follow the following steps for our method.
+Although WordNet already defines an entailment graph between verb senses, one hurdle to using it is determining what sense to use. For example, given the verb ``take,'' is it \textit{take\#21} (take by force) or \textit{take\#2} (take time)? Each sense will lead to very different entailments. The first part of our approach is to assume a string can take on any of its WordNet senses, which may lead to noisier entailments. The second part is to train a logistic regression classifier to help filter out noisy entailments.
 
+\subsubsection{Logistic regression classifier}
+For a certain training set of queries, we use all possible entailments from WordNet on the database query task, and label each fact as relevant to the query or not relevant to the query. We use these results as training data. For each result, we record the path that was taken in the entailment graph and produce the following features:
 \begin{enumerate}
-\item Assume a string can be any WordNet sense (``take'' = \textit{take\#1}, \textit{take\#2}, \ldots, \textit{take\#42})
-\item Attempt the database query task using all possible entailments.
-\item Label results as correct/incorrect
-\item Split results into train / test sets, gather features of the path taken through the entailment graph that connected the result to the query.
-\item Train a model of the probability that the path is correct given features of the path using
-logistic regression.
-\item Evaluate the model on the test set.
+  \item Path length
+  \item Average sense number
+  \item Average WordNet probability
+  \item Maximum sense number
+  \item Minimum WordNet probability
 \end{enumerate}
 
-Our features for a path in the entailment graph are as follows.
-\begin{enumerate}
-\item Path length
-\item Average sense number
-\item Average WordNet probability
-\item Maximum sense number
-\item Minimum WordNet probability
-\end{enumerate}
+The length of the path is how many nodes there were in the path. For example, in figure ~\ref{example-path}, the length is 3. Because WordNet senses are ranked in order frequency, we use the average and maximum sense numbers as features, the idea being that an uncommon WordNet sense (e.g., \textit{take\#42}) could be a weak link in the entailment path. A similar intuition holds for the probabilities of the WordNet senses.
 
-% TODO give justifications and explanations for the features
+The output of logistic regression is a set of weights $w$ for each feature. Let $x$ be the vector of features described above. Then the probability of the label we would like to predict is given by:
+\begin{align*}
+  p(x) = \frac{e^{w\cdot x}}{1 + e^{w\cdot x}}
+\end{align*}
+
+Finally, we run the database query task on the test set of queries, using the learned model to filter out unlikely entailments.
 
 \begin{figure}[h]
 \begin{center}
@@ -76,7 +74,6 @@ Our features for a path in the entailment graph are as follows.
 \end{center}
 \caption{Component of the WordNet entailment graph with the first sense of conquer, \textit{conquer\#1}. Boxes represent synonym sets, arrows represent entailments.}\label{wordnet-graph}
 \end{figure}
-
 
 \begin{figure}[h]
 \begin{center}
