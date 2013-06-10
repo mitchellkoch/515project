@@ -19,12 +19,14 @@ Using these methods to expand relation queries in order to improve queries, we f
 
 \section{Introduction and Motivation}
 
+Relation extraction systems are able to find examples of predicates between arguments in text. A goal of relation extraction is question answering, and for this, queries must be run over results from relation extraction. 
+
 Can learning relation entailment graphs based on WordNet or Bayes net
 structure learning improve relation query performance?
 
-Expanding relation queries is useful in any relation extraction context. We focused on Open IE, where the relations and arguments are all strings from sentences.
+Expanding relation queries is useful in any relation extraction context. This could be over surface forms (relation strings), as in Open IE~\cite{Etzioni:2008:OIE:1409360.1409378} or structured relations from Freebase. a We focused on Open IE, where the relations and arguments are all strings from sentences, but these methods could also apply in a structured context.
 
-Open IE~\cite{Etzioni:2008:OIE:1409360.1409378}
+
 
 previous relation entailment
 work~\cite{Berant:2012:LER:2122944.2122947, berant2011global}, on work in relation
