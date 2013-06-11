@@ -57,7 +57,7 @@ Given a query for a relation $r$ with arguments $x$ and $y$, we can expand the q
 WordNet~\cite{fellbaum98wordnet} is a hand-crafted resource that distinguishes between different word senses, and provides synonyms and entailments between them. We denote a WordNet sense with a number where \textit{\#1} is the most common. For example \textit{note\#4} is the fourth most common sense of ``note,'' which means ``to write down''. Each WordNet sense has its sense number, a count indicating how often that sense is used, and a probability, which is the count divided by the sum of counts for all senses of the same word.
 
 \subsubsection{WordNet entailment graph}
-A troponym is a specialization of a word, e.g., ``to fly'' is a troponym of ``to travel.'' We say that WordNet sense $w_1$ entails $w_2$ if $w_1$ is a synonym of $w_2$, if $w_1$ is a troponym of $w_2$ in WordNet, or if there exists some $w_3$ such that $w_1$ entails $w_3$ and $w_3$ entails $w_2$. A path in the entailment graph is defined as the sequence of troponyms between $w_1$ and $w_2$. The entailment graph is disconnected. Figure~\ref{wordnet-graph} shows one component of the graph, and figure~\ref{example-path} shows an example of a path in the graph, from \textit{note\#4} to \textit{write\#2}.
+A troponym is a specialization of a word, e.g., ``to fly'' is a troponym of ``to travel.'' We say that WordNet sense $w_1$ entails $w_2$ if $w_1$ is a synonym of $w_2$, if $w_1$ is a troponym of $w_2$ in WordNet, or if there exists some $w_3$ such that $w_1$ entails $w_3$ and $w_3$ entails $w_2$. A path in the entailment graph is defined as the sequence of entailments between $w_1$ and $w_2$. The entailment graph is disconnected. Figure~\ref{wordnet-graph} shows one component of the graph, and figure~\ref{example-path} shows an example of a path in the graph, from \textit{note\#4} to \textit{write\#2}.
 
 \begin{figure}[h]
 \begin{center}
@@ -175,7 +175,7 @@ To see the results of structure learning, we also tried a set of 10 benchmark qu
 \end{table}
 
 \begin{table}[h]
-  \caption{Results on database query task for queries in figure~\ref{structure-queries}.}\label{structure-results}
+  \caption{Results on database query task for queries in table~\ref{structure-queries}.}\label{structure-results}
   \begin{center}
     \begin{tabular}{l l l}
       \toprule
@@ -192,6 +192,21 @@ To see the results of structure learning, we also tried a set of 10 benchmark qu
 
 This set of results shows that our structure learning will increase the number of results returned, but at a high cost to precision. These results also show that for the type of more specific queries presented in table~\ref{structure-queries}, almost all the extra results given by WordNet entailments are bad. The classifier partially recovered the loss in precision.
 
+\begin{table}[h]
+  \caption{Combined results on database query task for queries in tables~\ref{benchmark-queries} and~\ref{structure-queries}.}\label{structure-results}
+  \begin{center}
+    \begin{tabular}{l l l}
+      \toprule
+      System & \# results returned & Precision\\
+      \midrule
+      Baseline & 165 & 87.88\%\\
+      Structure learning & 183 & 80.33\%\\
+      WordNet & 1188 & 84.09\% \\
+      WordNet + logistic regression & 1097 & 91.43\%\\
+      \bottomrule
+    \end{tabular}
+  \end{center}
+\end{table}
 
 \section{Discussion and Conclusion}
 Our results suggest that the choice of benchmark queries can make a big difference in the results. However, we noticed that using WordNet with a classifier does seem to increase yield at an acceptable level of precision. Although it's hard to say what queries should be used in our experiment, the queries in table~\ref{benchmark-queries} are arguably more common than those in table~\ref{structure-queries}.
